@@ -1,6 +1,6 @@
 ```
 ╭─────────────────────────────────────────╮
-│ Based on the original project cowsay —  │
+│ Inspired by the original project cowsay │
 │ https://github.com/cowsay-org/cowsay    │
 │                                         │
 ╰─────────────────────────────────────────╯
@@ -32,9 +32,6 @@ Dialog logic and ASCII art are **separate** so cows can change without rewriting
 ## Install (skills.sh)
 
 ```bash
-# private
-npx skills add git@github.com:kodexArg/cowsay.git
-# public later
 npx skills add kodexArg/cowsay
 # → https://skills.sh/kodexArg/cowsay/cowsay
 ```
@@ -65,15 +62,39 @@ python3 tests/test_cowsay.py
 ## Active cow
 
 ```bash
-./bin/cowsay -l              # loaded stems
+./bin/cowsay -l              # loaded stems (whatever is in cows/ + COWPATH)
 ./bin/cowsay --set-cow tux   # persist → .active-cow
 ./bin/cowsay --show-cow
 ```
 
-Agent slash form (skill contract): `/cowsay tux`, `/cowsay moose`,
-`/cowsay default` — any stem from `-l` → `--set-cow` (not a text one-shot).
-
 Priority: `-f` → `COWSAY_COW` → `.active-cow` → `default`.
+
+### Agent slash form (skill contract)
+
+In chat with the skill loaded, a **loaded cow stem** switches art permanently
+(via `--set-cow`). It is **not** a one-shot of that word as bubble text.
+
+**Example — TUX:**
+
+```text
+/cowsay tux
+```
+
+That runs `--set-cow tux` and confirms with the Tux figure. Later replies use
+Tux until you pick another cow.
+
+**Other options:** any stem returned by `./bin/cowsay -l` (bundled set today
+is typically `default`, `moose`, `tux`; plus any extra `.cow` files you add
+under `cows/` or via `COWPATH`). Examples:
+
+```text
+/cowsay moose
+/cowsay default
+/cowsay <any-stem-from--l>
+```
+
+If the token is **not** a loaded stem, `/cowsay <text>` is a one-shot render
+of that text with the current active cow.
 
 ## Release
 
@@ -85,5 +106,5 @@ Priority: `-f` → `COWSAY_COW` → `.active-cow` → `default`.
 | Layer split (`dialog` / `art` / `cows/`) | stable |
 | Terminal-aware wrap, hug-text box | stable |
 | Display width (wide/emoji/CJK/combining) | stable |
-| Active cow + skill UX | stable |
+| Active cow + skill UX (`/cowsay tux`, …) | stable |
 | Tests | `python3 tests/test_cowsay.py` |
