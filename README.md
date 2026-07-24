@@ -1,9 +1,15 @@
 ```
-╭─────────────────────────────────────────╮
-│ Inspired by the original project cowsay │
-│ https://github.com/cowsay-org/cowsay    │
-│                                         │
-╰─────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────╮
+│ Thanks: original cowsay — Tony Monroe / cowsay-org  │
+│ https://github.com/cowsay-org/cowsay                │
+│                                                     │
+│ npx skills add kodexArg/cowsay                      │
+│                                                     │
+│ /cowsay tux                                         │
+│ /cowsay moose                                       │
+│ /cowsay default                                     │
+│ /cowsay <text>                                      │
+╰─────────────────────────────────────────────────────╯
         \   ^__^
          \  (oo)\_______
             (__)\       )\/\
@@ -14,8 +20,7 @@
 # cowsay — kodexArg · v1.0.4
 
 Deterministic cowsay for AI agents. Python 3 **stdlib only**. **MIT**.
-
-Credit: original **cowsay** by Tony Monroe; art and spirit from the active community tree **[cowsay-org/cowsay](https://github.com/cowsay-org/cowsay)**. This tree is a kodexArg reimplementation (rounded dialog, agent skill, terminal-aware wrap) — not a fork of the Perl binary.
+Reimplementation (rounded dialog, agent skill, terminal-aware wrap) — not a fork of the Perl binary.
 
 ## Layout
 

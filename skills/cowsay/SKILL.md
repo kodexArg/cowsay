@@ -18,19 +18,18 @@ metadata:
 
 # cowsay
 
-Deterministic cowsay for AI agents. Python 3 **stdlib only**. **MIT**.
-
-Inspired by the original [cowsay](https://github.com/cowsay-org/cowsay) project
-(Tony Monroe; community tree cowsay-org). This is a kodexArg reimplementation
-(rounded dialog, agent skill, terminal-aware wrap) — not a fork of the Perl
-binary.
-
 ```
-╭─────────────────────────────────────────╮
-│ Inspired by the original project cowsay │
-│ https://github.com/cowsay-org/cowsay    │
-│                                         │
-╰─────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────╮
+│ Thanks: original cowsay — Tony Monroe / cowsay-org  │
+│ https://github.com/cowsay-org/cowsay                │
+│                                                     │
+│ npx skills add kodexArg/cowsay                      │
+│                                                     │
+│ /cowsay tux                                         │
+│ /cowsay moose                                       │
+│ /cowsay default                                     │
+│ /cowsay <text>                                      │
+╰─────────────────────────────────────────────────────╯
         \   ^__^
          \  (oo)\_______
             (__)\       )\/\
@@ -38,20 +37,11 @@ binary.
                 ||     ||
 ```
 
-## Install
-
-```bash
-npx skills add kodexArg/cowsay
-```
-
+Deterministic cowsay for AI agents. Python 3 **stdlib only**. **MIT**.
 Page: https://skills.sh/kodexArg/cowsay/cowsay
 
-After install, the skill root is wherever your agent placed it (for example
-`~/.agents/skills/cowsay`). All commands below use:
-
-```text
-$SKILL_ROOT/bin/cowsay
-```
+Skill root after install: wherever the agent placed it (e.g.
+`~/.agents/skills/cowsay`). Binary: `$SKILL_ROOT/bin/cowsay`.
 
 ## Prerequisites
 
