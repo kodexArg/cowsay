@@ -11,7 +11,7 @@
                 ||     ||
 ```
 
-# cowsay — kodexArg · v1.0.1
+# cowsay — kodexArg · v1.0.2
 
 Deterministic cowsay for AI agents. Python 3 **stdlib only**. **MIT**.
 
@@ -106,7 +106,7 @@ of that text with the current active cow.
 
 ## Release
 
-**v1.0.1** — display-column box/wrap (EAW / combining); review before git tag.
+**v1.0.2** — skills.sh layout (`skills/cowsay/`); display-column box/wrap.
 
 | Piece | Status |
 |-------|--------|

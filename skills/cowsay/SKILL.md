@@ -1,18 +1,15 @@
 ---
 name: cowsay
 description: >
-  Deterministic cowsay mode (kodexArg). Final replies are rendered only by
-  piping text through this skill's bin/cowsay with a terminal-aware -W width.
-  `/cowsay tux`, `/cowsay moose`, `/cowsay default` (any loaded stem from
-  `cowsay -l`) works: apply with `cowsay --set-cow <stem>`. When the user
-  asks to change the cow without naming one, list every loaded cow, offer
-  them as choices, then `--set-cow`. Triggers: /cowsay, /cowsay <stem>,
-  cowsay, modo vaca, hablá como vaca, cambiar la vaca, | cowsay, cowthink.
-  Confined to this skill tree.
+  Deterministic cowsay mode for AI agents (kodexArg). Render every final
+  reply through this skill bin/cowsay with terminal-aware wrap. Use when the
+  user runs /cowsay, says cowsay, modo vaca, change the cow, cowthink, or
+  asks to switch art with /cowsay tux (or any stem from cowsay -l). Apply
+  cow switches via --set-cow. Confined to this skill tree.
 license: MIT
 metadata:
   author: kodexArg
-  version: "1.0.1"
+  version: "1.0.2"
 ---
 
 # cowsay (kodexArg)
