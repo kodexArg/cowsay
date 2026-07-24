@@ -6,34 +6,41 @@
 |---|---|
 | Author | kodexArg |
 | License | MIT |
-| Scope | This tree only (`$SKILL_ROOT` = directory of `SKILL.md`) |
+| Skill | **cowsay** |
+| Scope | This tree only |
 
-## Product
+## Layers (keep separate)
 
-- Skill: `SKILL.md` — agent must pipe answers through the renderer.
-- Renderer: `bin/cowsay` — Python 3 stdlib, deterministic.
+| Path | Role |
+|------|------|
+| `bin/cowsay` | CLI compose |
+| `lib/dialog.py` | dialog box only |
+| `lib/art.py` | cowfile load / faces only |
+| `cows/*.cow` | ASCII resources (persistent; swap without touching dialog) |
 
 ## Contract
 
 ```bash
-printf '%s' "$TEXT" | ./bin/cowsay -W "$COLS"
+W=$(( ${COLUMNS:-80} - 4 ))
+./bin/cowsay -W "$W" <<'COWEOF'
+$TEXT
+COWEOF
 ```
 
-Same text + same flags → same bytes. No random, no locale-dependent layout, no system cowsay.
+Same text + same flags + same width env → same bytes.
 
 ## Rules
 
 1. Do not write outside this path unless ordered.
 2. Do not `apt install cowsay`.
-3. Do not freehand cow ASCII in chat; run the binary.
-4. After CLI changes: verify with the commands below.
+3. Do not freehand cow/dialog ASCII; run the binary.
+4. Do not put balloon logic in `.cow` files; do not put cow geometry in `dialog.py`.
+5. After changes: `python3 tests/test_cowsay.py`.
 
 ## Verify
 
 ```bash
-# from repository / skill root
 python3 tests/test_cowsay.py
 printf '%s' 'moo' | ./bin/cowsay -W 40
-printf '%s' 'a b c' | ./bin/cowsay -W 3
 printf '%s' 'x' | ./bin/cowsay -W 40 | cmp - <(printf '%s' 'x' | ./bin/cowsay -W 40)
 ```
