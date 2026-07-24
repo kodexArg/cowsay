@@ -6,3 +6,4 @@ __pycache__/
 htmlcov/
 .active-cow
 **/.active-cow
+.grok/
