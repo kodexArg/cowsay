@@ -1,0 +1,311 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+import textwrap
+import unicodedata
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+COWS = ROOT / "cows"
+VERSION = "0.2.2"
+
+
+def paths() -> list[Path]:
+    """Search dirs for cowfiles. COWPATH entries first; bundled cows always last."""
+    dirs: list[Path] = []
+    raw = os.environ.get("COWPATH")
+    if raw:
+        dirs.extend(Path(p) for p in raw.split(os.pathsep) if p)
+    try:
+        default = COWS.resolve()
+    except OSError:
+        default = COWS
+    if not any(_same_dir(d, default) for d in dirs):
+        dirs.append(COWS)
+    return dirs
+
+
+def _same_dir(a: Path, b: Path) -> bool:
+    try:
+        return a.resolve() == b.resolve()
+    except OSError:
+        return a == b
+
+
+def _resolve_path(path: Path) -> Path | None:
+    try:
+        return path.resolve(strict=True)
+    except OSError:
+        try:
+            return path.resolve()
+        except OSError:
+            return None
+
+
+def _under_root(real_file: Path, root: Path) -> bool:
+    """True if real_file is a file strictly inside root (after resolve)."""
+    root_real = _resolve_path(root)
+    if root_real is None or not root_real.is_dir():
+        return False
+    try:
+        real_file.relative_to(root_real)
+    except ValueError:
+        return False
+    return real_file != root_real
+
+
+def accept_cowfile(path: Path) -> Path | None:
+    """
+    Accept only real files whose resolved path ends in .cow and lies under
+    a COWPATH / bundled cows directory. Blocks symlink escape (e.g. evil.cow -> /etc/passwd).
+    """
+    real = _resolve_path(path)
+    if real is None or not real.is_file():
+        return None
+    if real.suffix != ".cow":
+        return None
+    for directory in paths():
+        if _under_root(real, directory):
+            return real
+    return None
+
+
+def resolve_cow(name: str) -> Path:
+    candidate = Path(name)
+    pathlike = (
+        candidate.is_absolute()
+        or os.sep in name
+        or (os.altsep is not None and os.altsep in name)
+    )
+
+    # Explicit filesystem path (sep/absolute, or an existing *.cow in cwd).
+    # Bare stems like "default" always go through COWPATH search — never bind to a
+    # random cwd file named "default".
+    explicit = pathlike or (candidate.suffix == ".cow" and candidate.is_file())
+    if explicit:
+        if candidate.suffix != ".cow" and not name.endswith(".cow"):
+            sys.stderr.write(f"cowsay: refusing non-.cow path: {name}\n")
+            raise SystemExit(2)
+        accepted = accept_cowfile(candidate)
+        if accepted is not None:
+            return accepted
+        try:
+            exists = candidate.is_file()
+        except OSError:
+            exists = False
+        if exists:
+            sys.stderr.write(f"cowsay: refusing cowfile outside COWPATH: {name}\n")
+        else:
+            sys.stderr.write(f"cowsay: cowfile not found: {name}\n")
+        raise SystemExit(2)
+
+    # Bare name: search COWPATH + bundled
+    stem = name if name.endswith(".cow") else f"{name}.cow"
+    for directory in paths():
+        for hit in (directory / stem, directory / name):
+            accepted = accept_cowfile(hit)
+            if accepted is not None:
+                return accepted
+    sys.stderr.write(f"cowsay: cowfile not found: {name}\n")
+    raise SystemExit(2)
+
+
+def list_cows() -> int:
+    names: list[str] = []
+    for directory in paths():
+        if not directory.is_dir():
+            continue
+        for p in sorted(directory.glob("*.cow")):
+            if accept_cowfile(p) is not None:
+                names.append(p.stem)
+    if not names:
+        sys.stderr.write("cowsay: no cowfiles\n")
+        return 2
+    sys.stdout.write(" ".join(dict.fromkeys(names)) + "\n")
+    return 0
+
+
+def load_cow(path: Path, thoughts: str, eyes: str, tongue: str) -> str:
+    try:
+        body = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        sys.stderr.write(f"cowsay: cannot read cowfile: {path}: {exc.strerror or exc}\n")
+        raise SystemExit(2) from None
+    except UnicodeDecodeError:
+        sys.stderr.write(f"cowsay: invalid UTF-8 in cowfile: {path}\n")
+        raise SystemExit(2) from None
+    for key, val in (
+        ("$thoughts", thoughts),
+        ("$eyes", eyes),
+        ("$tongue", tongue),
+    ):
+        body = body.replace(key, val)
+    lines = [line.rstrip("\n") for line in body.splitlines()]
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    while lines and not lines[-1].strip():
+        lines.pop()
+    return "\n".join(lines) + "\n"
+
+
+def normalize(text: str) -> str:
+    return unicodedata.normalize("NFC", text.expandtabs(8).replace("\r\n", "\n").replace("\r", "\n"))
+
+
+def wrap_lines(text: str, width: int, hard: bool) -> list[str]:
+    text = normalize(text)
+    if hard:
+        return text.split("\n") if text else [""]
+    width = max(1, width)
+    out: list[str] = []
+    for para in text.split("\n"):
+        if para == "":
+            out.append("")
+            continue
+        out.extend(textwrap.wrap(para, width=width, break_long_words=True, break_on_hyphens=False) or [""])
+    return out or [""]
+
+
+def balloon(lines: list[str], think: bool) -> tuple[list[str], str]:
+    width = max(len(line) for line in lines)
+    border = width + 2
+    top = " " + ("_" * border)
+    bot = " " + ("-" * border)
+    body: list[str] = []
+    if think:
+        for line in lines:
+            body.append(f"( {line.ljust(width)} )")
+        return [top, *body, bot], "o"
+    if len(lines) == 1:
+        body.append(f"< {lines[0].ljust(width)} >")
+    else:
+        for i, line in enumerate(lines):
+            if i == 0:
+                body.append(f"/ {line.ljust(width)} \\")
+            elif i == len(lines) - 1:
+                body.append(f"\\ {line.ljust(width)} /")
+            else:
+                body.append(f"| {line.ljust(width)} |")
+    return [top, *body, bot], "\\"
+
+
+def face(eyes: str, tongue: str, flags: set[str]) -> tuple[str, str]:
+    e = (eyes + "  ")[:2]
+    t = (tongue + "  ")[:2]
+    if "b" in flags:
+        e = "=="
+    if "d" in flags:
+        e, t = "xx", "U "
+    if "g" in flags:
+        e = "$$"
+    if "p" in flags:
+        e = "@@"
+    if "s" in flags:
+        e, t = "**", "U "
+    if "t" in flags:
+        e = "--"
+    if "w" in flags:
+        e = "OO"
+    if "y" in flags:
+        e = ".."
+    return e, t
+
+
+def read_text(argv_message: list[str]) -> str:
+    if argv_message:
+        return " ".join(argv_message)
+    data = sys.stdin.buffer.read()
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError:
+        sys.stderr.write("cowsay: invalid UTF-8 on stdin\n")
+        raise SystemExit(1) from None
+
+
+def parse(argv: list[str]) -> argparse.Namespace:
+    p = argparse.ArgumentParser(prog="cowsay", add_help=False)
+    p.add_argument("-h", "--help", action="store_true")
+    p.add_argument("-V", "--version", action="store_true")
+    p.add_argument("-l", action="store_true")
+    p.add_argument("-n", action="store_true")
+    p.add_argument("-W", type=int, default=40, metavar="cols")
+    p.add_argument("-e", default="oo")
+    p.add_argument("-T", default="  ")
+    p.add_argument("-f", default="default")
+    p.add_argument("-b", action="store_true")
+    p.add_argument("-d", action="store_true")
+    p.add_argument("-g", action="store_true")
+    p.add_argument("-p", action="store_true")
+    p.add_argument("-s", action="store_true")
+    p.add_argument("-t", action="store_true")
+    p.add_argument("-w", action="store_true")
+    p.add_argument("-y", action="store_true")
+    p.add_argument("--think", action="store_true")
+    p.add_argument("message", nargs="*")
+    return p.parse_args(argv)
+
+
+def render(
+    text: str,
+    width: int = 40,
+    *,
+    cow: str = "default",
+    think: bool = False,
+    hard: bool = False,
+    eyes: str = "oo",
+    tongue: str = "  ",
+    flags: set[str] | None = None,
+) -> str:
+    flags = flags or set()
+    lines = wrap_lines(text.rstrip("\n"), width, hard)
+    ball, thoughts = balloon(lines, think)
+    e, t = face(eyes, tongue, flags)
+    art = load_cow(resolve_cow(cow), thoughts, e, t)
+    return "\n".join(ball) + "\n" + art
+
+
+def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    args = parse(argv)
+    if args.help:
+        sys.stdout.write(
+            "usage: cowsay [-W cols] [-f cow] [-e eyes] [-T tongue]\n"
+            "              [-bdgpstwy] [-n] [--think] [-l] [message...]\n"
+            "       printf '%s' TEXT | cowsay -W cols\n"
+        )
+        return 0
+    if args.version:
+        sys.stdout.write(f"cowsay {VERSION} kodexArg\n")
+        return 0
+    if args.l:
+        return list_cows()
+
+    think = args.think or Path(sys.argv[0]).name == "cowthink"
+    flags = {k for k in "bdgpstwy" if getattr(args, k)}
+    text = read_text(args.message)
+    out = render(
+        text,
+        width=args.W,
+        cow=args.f,
+        think=think,
+        hard=args.n,
+        eyes=args.e,
+        tongue=args.T,
+        flags=flags,
+    )
+    sys.stdout.write(out)
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except BrokenPipeError:
+        try:
+            sys.stdout.close()
+        except Exception:
+            pass
+        raise SystemExit(0)
