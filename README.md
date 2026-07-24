@@ -11,7 +11,7 @@
                 ||     ||
 ```
 
-# cowsay — kodexArg · v1.0.2
+# cowsay — kodexArg · v1.0.3
 
 Deterministic cowsay for AI agents. Python 3 **stdlib only**. **MIT**.
 
@@ -21,19 +21,21 @@ Credit: original **cowsay** by Tony Monroe; art and spirit from the active commu
 
 ```
 skills/cowsay/           ← installable skill (skills.sh convention)
-  SKILL.md               agent skill contract
+  SKILL.md               public docs (shown on skills.sh) + agent contract
   bin/cowsay             CLI (compose only)
   lib/dialog.py          rounded box, wrap, terminal width
   lib/art.py             COWPATH, load cows/*.cow, faces, active cow
   cows/*.cow             ASCII resources ($thoughts $eyes $tongue)
   tests/                 goldens
-README.md LICENSE        package docs (repo root)
+README.md LICENSE        package docs (repo root; keep in sync with SKILL.md intro)
 ```
 
 Dialog logic and ASCII art are **separate** so cows can change without rewriting the balloon.
 
-> **skills.sh note:** the directory indexes skills under `skills/<name>/SKILL.md`.
-> A root-level `SKILL.md` installs via the CLI but does **not** get a skill page.
+> **skills.sh note:** the directory indexes `skills/<name>/SKILL.md` and renders
+> that file’s body on the skill page — **not** the repo-root `README.md`.
+> Public install/usage text therefore lives in `skills/cowsay/SKILL.md`
+> (derived from this README).
 
 ## Install (skills.sh)
 
@@ -106,7 +108,7 @@ of that text with the current active cow.
 
 ## Release
 
-**v1.0.2** — skills.sh layout (`skills/cowsay/`); display-column box/wrap.
+**v1.0.3** — skills.sh shows `SKILL.md` body (README-based public docs + agent contract).
 
 | Piece | Status |
 |-------|--------|
