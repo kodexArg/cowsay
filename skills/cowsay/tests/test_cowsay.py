@@ -209,7 +209,7 @@ class CowsayTests(unittest.TestCase):
     def test_version(self) -> None:
         r = run(["-V"])
         self.assertEqual(r.returncode, 0)
-        self.assertIn(b"1.0.4", r.stdout)
+        self.assertIn(b"1.0.5", r.stdout)
         self.assertIn(b"kodexArg", r.stdout)
 
     def test_hard_wrap_n(self) -> None:

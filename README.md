@@ -17,7 +17,7 @@
                 ||     ||
 ```
 
-# cowsay — kodexArg · v1.0.4
+# cowsay — kodexArg · v1.0.5
 
 Deterministic cowsay for AI agents. Python 3 **stdlib only**. **MIT**.
 Reimplementation (rounded dialog, agent skill, terminal-aware wrap) — not a fork of the Perl binary.
@@ -115,7 +115,7 @@ of that text with the current active cow.
 
 ## Release
 
-**v1.0.4** — `SKILL.md` in Agent Skills format (frontmatter + install/usage instructions for skills.sh).
+**v1.0.5** — `SKILL.md` in Agent Skills format (frontmatter + install/usage instructions for skills.sh).
 
 | Piece | Status |
 |-------|--------|

@@ -12,7 +12,7 @@ compatibility: >
   bin/cowsay under this skill folder — do not apt-install system cowsay.
 metadata:
   author: kodexArg
-  version: "1.0.4"
+  version: "1.0.5"
   homepage: https://github.com/kodexArg/cowsay
 ---
 
