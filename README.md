@@ -20,14 +20,20 @@ Credit: original **cowsay** by Tony Monroe; art and spirit from the active commu
 ## Layout
 
 ```
-bin/cowsay       CLI (compose only)
-lib/dialog.py    rounded box, wrap, terminal width
-lib/art.py       COWPATH, load cows/*.cow, faces, active cow
-cows/*.cow       ASCII resources ($thoughts $eyes $tongue)
-SKILL.md         agent skill contract
+skills/cowsay/           ← installable skill (skills.sh convention)
+  SKILL.md               agent skill contract
+  bin/cowsay             CLI (compose only)
+  lib/dialog.py          rounded box, wrap, terminal width
+  lib/art.py             COWPATH, load cows/*.cow, faces, active cow
+  cows/*.cow             ASCII resources ($thoughts $eyes $tongue)
+  tests/                 goldens
+README.md LICENSE        package docs (repo root)
 ```
 
 Dialog logic and ASCII art are **separate** so cows can change without rewriting the balloon.
+
+> **skills.sh note:** the directory indexes skills under `skills/<name>/SKILL.md`.
+> A root-level `SKILL.md` installs via the CLI but does **not** get a skill page.
 
 ## Install (skills.sh)
 
@@ -39,6 +45,7 @@ npx skills add kodexArg/cowsay
 ## Local use
 
 ```bash
+cd skills/cowsay
 printf '%s' 'moo' | ./bin/cowsay              # -W = terminal width (wrap only)
 printf '%s' 'hi'  | ./bin/cowsay -W 40
 printf '%s' 'hi'  | ./bin/cowsay -W 20 -f tux
@@ -62,6 +69,7 @@ python3 tests/test_cowsay.py
 ## Active cow
 
 ```bash
+cd skills/cowsay
 ./bin/cowsay -l              # loaded stems (whatever is in cows/ + COWPATH)
 ./bin/cowsay --set-cow tux   # persist → .active-cow
 ./bin/cowsay --show-cow
