@@ -116,3 +116,9 @@ of that text with the current active cow.
 | Display width (wide/emoji/CJK/combining) | stable |
 | Active cow + skill UX (`/cowsay tux`, …) | stable |
 | Tests | `python3 tests/test_cowsay.py` |
+
+## License
+
+**[MIT](LICENSE)** — Copyright (c) 2026 kodexArg (Gabriel Cavedal) / [kodexarg.com](https://kodexarg.com).
+
+See [`LICENSE`](LICENSE) for the full text.
