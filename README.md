@@ -11,7 +11,7 @@
                 ||     ||
 ```
 
-# cowsay — kodexArg · v1.0.3
+# cowsay — kodexArg · v1.0.4
 
 Deterministic cowsay for AI agents. Python 3 **stdlib only**. **MIT**.
 
@@ -32,10 +32,12 @@ README.md LICENSE        package docs (repo root; keep in sync with SKILL.md int
 
 Dialog logic and ASCII art are **separate** so cows can change without rewriting the balloon.
 
-> **skills.sh note:** the directory indexes `skills/<name>/SKILL.md` and renders
-> that file’s body on the skill page — **not** the repo-root `README.md`.
-> Public install/usage text therefore lives in `skills/cowsay/SKILL.md`
-> (derived from this README).
+> **Agent Skills / skills.sh format:** the installable unit is
+> `skills/cowsay/SKILL.md` (YAML frontmatter + Markdown instructions per
+> [agentskills.io/specification](https://agentskills.io/specification)).
+> skills.sh renders that body on the skill page — not this README. Keep
+> install and usage instructions in `SKILL.md`; keep this README as the
+> GitHub landing page (same content, human-oriented).
 
 ## Install (skills.sh)
 
@@ -108,7 +110,7 @@ of that text with the current active cow.
 
 ## Release
 
-**v1.0.3** — skills.sh shows `SKILL.md` body (README-based public docs + agent contract).
+**v1.0.4** — `SKILL.md` in Agent Skills format (frontmatter + install/usage instructions for skills.sh).
 
 | Piece | Status |
 |-------|--------|

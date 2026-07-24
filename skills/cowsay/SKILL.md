@@ -1,25 +1,29 @@
 ---
 name: cowsay
 description: >
-  Deterministic cowsay mode for AI agents (kodexArg). Render every final
-  reply through this skill bin/cowsay with terminal-aware wrap. Use when the
-  user runs /cowsay, says cowsay, modo vaca, change the cow, cowthink, or
-  asks to switch art with /cowsay tux (or any stem from cowsay -l). Apply
-  cow switches via --set-cow. Confined to this skill tree.
+  Deterministic cowsay for AI agents (kodexArg). Renders replies through a
+  bundled Python stdlib bin/cowsay with terminal-aware wrap and swappable
+  ASCII art. Use when the user runs /cowsay, asks for cowsay mode, cowthink,
+  modo vaca, change the cow, or switches art with /cowsay tux (or any stem
+  from cowsay -l). Apply persistent switches with --set-cow.
 license: MIT
+compatibility: >
+  Requires Python 3. Uses only the Python standard library. Bundled
+  bin/cowsay under this skill folder — do not apt-install system cowsay.
 metadata:
   author: kodexArg
-  version: "1.0.3"
+  version: "1.0.4"
+  homepage: https://github.com/kodexArg/cowsay
 ---
 
-# cowsay — kodexArg · v1.0.3
+# cowsay
 
 Deterministic cowsay for AI agents. Python 3 **stdlib only**. **MIT**.
 
-Inspired by the original project [cowsay](https://github.com/cowsay-org/cowsay)
-(Tony Monroe; community tree cowsay-org/cowsay). This is a kodexArg
-reimplementation (rounded dialog, agent skill, terminal-aware wrap) — not a
-fork of the Perl binary.
+Inspired by the original [cowsay](https://github.com/cowsay-org/cowsay) project
+(Tony Monroe; community tree cowsay-org). This is a kodexArg reimplementation
+(rounded dialog, agent skill, terminal-aware wrap) — not a fork of the Perl
+binary.
 
 ```
 ╭─────────────────────────────────────────╮
@@ -34,111 +38,111 @@ fork of the Perl binary.
                 ||     ||
 ```
 
-## Install (skills.sh)
+## Install
 
 ```bash
 npx skills add kodexArg/cowsay
-# → https://skills.sh/kodexArg/cowsay/cowsay
 ```
 
-## Layout
+Page: https://skills.sh/kodexArg/cowsay/cowsay
 
-```
-skills/cowsay/           installable skill (this folder)
-  SKILL.md               this file (agent contract + public docs)
-  bin/cowsay             CLI (compose only)
-  lib/dialog.py          rounded box, wrap, terminal width
-  lib/art.py             COWPATH, load cows/*.cow, faces, active cow
-  cows/*.cow             ASCII resources ($thoughts $eyes $tongue)
-  tests/                 goldens
+After install, the skill root is wherever your agent placed it (for example
+`~/.agents/skills/cowsay`). All commands below use:
+
+```text
+$SKILL_ROOT/bin/cowsay
 ```
 
-Dialog logic and ASCII art are **separate** so cows can change without
-rewriting the balloon.
-
-## Local use
+## Prerequisites
 
 ```bash
-# from this skill directory
-printf '%s' 'moo' | ./bin/cowsay              # -W = terminal width (wrap only)
-printf '%s' 'hi'  | ./bin/cowsay -W 40
-printf '%s' 'hi'  | ./bin/cowsay -W 20 -f tux
-printf '%s' 'hmm' | ./bin/cowsay -W 40 --think
-./bin/cowsay -l
-python3 tests/test_cowsay.py
+python3 --version          # 3.x
+test -x "$SKILL_ROOT/bin/cowsay"
+"$SKILL_ROOT/bin/cowsay" -l
+"$SKILL_ROOT/bin/cowsay" -V
 ```
 
-| Env | Effect |
-|-----|--------|
-| `COLUMNS` | terminal width when `-W` omitted |
-| `COWSAY_WIDTH` | pin wrap width (tests/CI; beats `COLUMNS`) |
-| `COWSAY_COW` | force active cow stem (beats `.active-cow`) |
-| `COWPATH` | extra cow directories |
+No network, no extra packages, no system `cowsay`.
 
-## Dialog vs art
+## How to use (chat)
 
-- **Dialog** (`lib/dialog.py`): min 3 text rows; width = **display columns**
-  (EAW + combining) + 1 blank, floored by art silhouette; `-W` wraps by
-  columns, not codepoints.
-- **Art** (`cows/*.cow`): original-style figures; add/replace via `-f name`
-  or `--set-cow`.
+| User says | What happens |
+|-----------|----------------|
+| `/cowsay` | Enter cowsay mode until “basta vaca” / “normal mode” / “salí de cowsay” |
+| `/cowsay tux` | **Switch art** to Tux (persist with `--set-cow tux`) |
+| `/cowsay moose` | Switch art to moose |
+| `/cowsay default` | Switch art to default cow |
+| `/cowsay <stem>` | Switch art if `stem` is listed by `cowsay -l` |
+| `/cowsay <text>` | One-shot: render that text if `text` is **not** a loaded stem |
+| “change the cow” / “cambiar la vaca” (no name) | List every stem from `-l`, wait for pick, then `--set-cow` |
+| “cowthink” / “pensá” | Render with `--think` |
+| “solo esta vez” + a stem | One-shot art via `-f <stem>` (do not persist) |
 
-## Active cow
-
-```bash
-./bin/cowsay -l              # loaded stems (cows/ + COWPATH)
-./bin/cowsay --set-cow tux   # persist → .active-cow
-./bin/cowsay --show-cow
-```
-
-Priority: `-f` → `COWSAY_COW` → `.active-cow` → `default`.
-
-### Agent slash form
-
-In chat with the skill loaded, a **loaded cow stem** switches art permanently
-(via `--set-cow`). It is **not** a one-shot of that word as bubble text.
-
-**Example — TUX:**
+### Example — TUX
 
 ```text
 /cowsay tux
 ```
 
-That runs `--set-cow tux` and confirms with the Tux figure. Later replies use
-Tux until you pick another cow.
+1. Confirm stem is loaded: `"$SKILL_ROOT/bin/cowsay" -l`
+2. Persist: `"$SKILL_ROOT/bin/cowsay" --set-cow tux`
+3. Confirm by rendering through the binary (Tux art, not freehand ASCII)
 
-**Other options:** any stem from `./bin/cowsay -l` (bundled set is typically
-`default`, `moose`, `tux`; plus extra `.cow` files under `cows/` or
-`COWPATH`):
+**Other cows:** whatever `./bin/cowsay -l` returns (bundled set is typically
+`default`, `moose`, `tux`; plus any extra `.cow` under `cows/` or `COWPATH`).
 
-```text
-/cowsay moose
-/cowsay default
-/cowsay <any-stem-from--l>
+## CLI (local / agent shell)
+
+```bash
+printf '%s' 'moo' | "$SKILL_ROOT/bin/cowsay"
+printf '%s' 'hi'  | "$SKILL_ROOT/bin/cowsay" -W 40
+printf '%s' 'hi'  | "$SKILL_ROOT/bin/cowsay" -W 20 -f tux
+printf '%s' 'hmm' | "$SKILL_ROOT/bin/cowsay" -W 40 --think
+"$SKILL_ROOT/bin/cowsay" -l
+"$SKILL_ROOT/bin/cowsay" --set-cow tux
+"$SKILL_ROOT/bin/cowsay" --show-cow
+python3 "$SKILL_ROOT/tests/test_cowsay.py"
 ```
 
-If the token is **not** a loaded stem, `/cowsay <text>` is a one-shot render
-of that text with the current active cow.
+Prefer a **quoted heredoc** for multi-line answers:
 
-## License
+```bash
+"$SKILL_ROOT/bin/cowsay" -W "$W" <<'COWEOF'
+Your full answer here.
+COWEOF
+```
 
-**MIT** — Copyright (c) 2026 kodexArg (Gabriel Cavedal) / kodexarg.com.
-See the repository root `LICENSE` for the full text.
+### Flags (common)
 
----
+| Flag | Effect |
+|------|--------|
+| `-W N` | Wrap width (display columns). Prefer terminal width; never hardcode 48 |
+| `-f <stem>` | One-shot cow (does not write `.active-cow`) |
+| `--set-cow <stem>` | Persist active cow to `.active-cow` |
+| `--show-cow` | Print active stem |
+| `-l` | List loaded stems |
+| `--think` | Thought bubbles instead of speech |
+| `-d` / faces | Classic face flags when asked |
 
-# Agent contract (mandatory)
+### Environment
 
-Renderer is law. The model **never** draws the cow or the dialog by hand.
+| Env | Effect |
+|-----|--------|
+| `COLUMNS` | Terminal width when `-W` omitted |
+| `COWSAY_WIDTH` | Pin wrap width (tests/CI; beats `COLUMNS`) |
+| `COWSAY_COW` | Force active cow stem (beats `.active-cow`) |
+| `COWPATH` | Extra directories of `.cow` files |
 
-## Skill root
+### Active cow priority
 
-`SKILL_ROOT` = directory containing this `SKILL.md`.  
-Binary: `$SKILL_ROOT/bin/cowsay`.
+`-f` → `COWSAY_COW` → `.active-cow` → `default`
 
-## Width (use the terminal)
+## Agent instructions
 
-**Never hardcode `-W 48`.**
+**Renderer is law.** Never freehand the dialog box or the ASCII animal. Always
+run `$SKILL_ROOT/bin/cowsay` and show only its stdout (one fenced code block).
+
+### 1. Resolve width
 
 ```bash
 if [ -n "${COWSAY_WIDTH:-}" ]; then
@@ -153,13 +157,7 @@ fi
 [ "$W" -lt 8 ] && W=8
 ```
 
-Or omit `-W`. Outer box = content + 4.
-
-## Changing the cow
-
-### Slash form (works; first-class)
-
-`/cowsay <stem>` where `<stem>` is a loaded cow from `-l`:
+### 2. Switch cow when the user names a stem
 
 ```bash
 "$SKILL_ROOT/bin/cowsay" -l
@@ -169,47 +167,41 @@ Listo: vaca activa = <stem>
 COWEOF
 ```
 
-### Menu (user did not name a cow)
+Do not invent stem names. Source of truth is `-l`.
 
-1. `"$SKILL_ROOT/bin/cowsay" -l` and `--show-cow`
-2. Offer **every** stem from `-l` (do not invent names)
-3. Wait for the pick; then `--set-cow`
+### 3. Every final reply in cowsay mode
 
-### One-shot without persisting
+1. Write the full answer in the user’s language.
+2. Pipe it through the binary (heredoc above).
+3. User-visible output = that stdout only.
 
-Only if the user says “solo esta vez” / “just this once”:
+### 4. Failure
 
-```bash
-"$SKILL_ROOT/bin/cowsay" -f <stem> -W "$W" <<'COWEOF'
-...
-COWEOF
+If the binary exits non-zero, report stderr and exit code in **plain text**.
+Do not invent art.
+
+### 5. Confinement
+
+Only operate inside `$SKILL_ROOT`. After code changes:
+`python3 "$SKILL_ROOT/tests/test_cowsay.py"`.
+
+## Layout
+
+```text
+skills/cowsay/
+  SKILL.md          this file (Agent Skills format)
+  bin/cowsay        CLI compose only
+  lib/dialog.py     balloon, wrap, terminal width
+  lib/art.py        COWPATH, load .cow, faces, active cow
+  cows/*.cow        ASCII resources ($thoughts $eyes $tongue)
+  tests/            goldens
 ```
 
-## Every final reply
+Dialog and art are separate layers so figures can change without rewriting the
+balloon.
 
-1. Write the full answer (user language).
-2. Resolve `W` (or omit `-W`).
-3. Render with a **quoted** heredoc (uses active cow unless `-f`):
+## License
 
-```bash
-"$SKILL_ROOT/bin/cowsay" -W "$W" <<'COWEOF'
-<the full answer>
-COWEOF
-```
+**MIT** — Copyright (c) 2026 kodexArg (Gabriel Cavedal) / kodexarg.com.
 
-4. User-visible output = that stdout only, one fenced code block.
-
-## Session
-
-- `/cowsay` → stay until “basta vaca” / “normal mode” / “salí de cowsay”.
-- `/cowsay <stem>` if stem ∈ `cowsay -l` → **cow switch** via `--set-cow`.
-- `/cowsay <text>` if text is **not** a loaded stem → one-shot.
-- Active cow persists via `.active-cow`.
-
-## Failure
-
-Binary failure → plain text stderr + exit code. No invented art.
-
-## Confinement
-
-Only `$SKILL_ROOT`. After changes: `python3 tests/test_cowsay.py`.
+Full text: repository root `LICENSE`.
