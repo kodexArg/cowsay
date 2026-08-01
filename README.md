@@ -1,133 +1,58 @@
-```
-╭─────────────────────────────────────────────────────╮
-│ Thanks: original cowsay — Tony Monroe / cowsay-org  │
-│ https://github.com/cowsay-org/cowsay                │
-│                                                     │
-│ npx skills add kodexArg/cowsay                      │
-│                                                     │
-│ /cowsay tux                                         │
-│ /cowsay moose                                       │
-│ /cowsay default                                     │
-│ /cowsay <text>                                      │
-╰─────────────────────────────────────────────────────╯
-        \   ^__^
-         \  (oo)\_______
-            (__)\       )\/\
-                ||----w |
-                ||     ||
-```
+# cowsay 🐮
 
-# cowsay — kodexArg · v1.0.5
+![cowsay running inside Claude Code](assets/cowsay-demo.png)
 
-Deterministic cowsay for AI agents. Python 3 **stdlib only**. **MIT**.
-Reimplementation (rounded dialog, agent skill, terminal-aware wrap) — not a fork of the Perl binary.
-
-## Layout
-
-```
-skills/cowsay/           ← installable skill (skills.sh convention)
-  SKILL.md               public docs (shown on skills.sh) + agent contract
-  bin/cowsay             CLI (compose only)
-  lib/dialog.py          rounded box, wrap, terminal width
-  lib/art.py             COWPATH, load cows/*.cow, faces, active cow
-  cows/*.cow             ASCII resources ($thoughts $eyes $tongue)
-  tests/                 goldens
-README.md LICENSE        package docs (repo root; keep in sync with SKILL.md intro)
-```
-
-Dialog logic and ASCII art are **separate** so cows can change without rewriting the balloon.
-
-> **Agent Skills / skills.sh format:** the installable unit is
-> `skills/cowsay/SKILL.md` (YAML frontmatter + Markdown instructions per
-> [agentskills.io/specification](https://agentskills.io/specification)).
-> skills.sh renders that body on the skill page — not this README. Keep
-> install and usage instructions in `SKILL.md`; keep this README as the
-> GitHub landing page (same content, human-oriented).
-
-## Install (skills.sh)
+A cow that talks in your agent's terminal. Python 3 **stdlib only** — no
+network, no pip, no system `cowsay`. **MIT**, by [kodexArg](https://kodexarg.com).
 
 ```bash
 npx skills add kodexArg/cowsay
-# → https://skills.sh/kodexArg/cowsay/cowsay
 ```
 
-## Local use
+## Talk to it
+
+| You say | It does |
+|---|---|
+| `/cowsay` | cow mode — every reply comes out of the cow |
+| `/cowsay tux` | swap the art (persists) |
+| `/cowsay hello world` | one-shot render |
+| "cowthink" | thought bubbles instead of speech |
+| "enough cow" | back to normal |
+
+## Or use the CLI
 
 ```bash
 cd skills/cowsay
-printf '%s' 'moo' | ./bin/cowsay              # -W = terminal width (wrap only)
-printf '%s' 'hi'  | ./bin/cowsay -W 40
-printf '%s' 'hi'  | ./bin/cowsay -W 20 -f tux
-printf '%s' 'hmm' | ./bin/cowsay -W 40 --think
-./bin/cowsay -l
-python3 tests/test_cowsay.py
+printf 'moo' | bin/cowsay             # ← the whole thing
+printf 'hmm' | bin/cowsay --think     # 💭
+bin/cowsay -l                         # default · moose · tux
+bin/cowsay --set-cow tux              # 🐧 forever
 ```
 
-| Env | Effect |
-|-----|--------|
-| `COLUMNS` | terminal width when `-W` omitted |
-| `COWSAY_WIDTH` | pin wrap width (tests/CI; beats `COLUMNS`) |
-| `COWSAY_COW` | force active cow stem (beats `.active-cow`) |
-| `COWPATH` | extra cow directories |
+Active cow wins in this order: `-f` → `COWSAY_COW` → `.active-cow` → `default`.
+Width takes care of itself (capped at 72 columns so it always fits) — just don't
+pass `-W`.
 
-## Dialog vs art
+## Why it exists
 
-- **Dialog** (`lib/dialog.py`): min 3 rows; width = **display columns** (EAW + combining) + 1 blank, floored by art silhouette; `-W` wraps by columns not codepoints.
-- **Art** (`cows/*.cow`): original-style figures; add/replace via `-f name` or `--set-cow`.
+Agents freehand ASCII art, and it comes out crooked. So the rule is
+**the renderer is law**: the agent pipes its answer through `bin/cowsay` and
+shows only stdout. Deterministic box, every time.
 
-## Active cow
+```text
+skills/cowsay/
+  SKILL.md        agent instructions
+  bin/cowsay      compose
+  lib/dialog.py   the balloon
+  lib/art.py      the animal
+  cows/*.cow      more animals — drop yours in, or point COWPATH at them
+  tests/          goldens
+```
+
+Dialog and art are separate layers, so a new cow never touches the box.
 
 ```bash
-cd skills/cowsay
-./bin/cowsay -l              # loaded stems (whatever is in cows/ + COWPATH)
-./bin/cowsay --set-cow tux   # persist → .active-cow
-./bin/cowsay --show-cow
+python3 skills/cowsay/tests/test_cowsay.py
 ```
 
-Priority: `-f` → `COWSAY_COW` → `.active-cow` → `default`.
-
-### Agent slash form (skill contract)
-
-In chat with the skill loaded, a **loaded cow stem** switches art permanently
-(via `--set-cow`). It is **not** a one-shot of that word as bubble text.
-
-**Example — TUX:**
-
-```text
-/cowsay tux
-```
-
-That runs `--set-cow tux` and confirms with the Tux figure. Later replies use
-Tux until you pick another cow.
-
-**Other options:** any stem returned by `./bin/cowsay -l` (bundled set today
-is typically `default`, `moose`, `tux`; plus any extra `.cow` files you add
-under `cows/` or via `COWPATH`). Examples:
-
-```text
-/cowsay moose
-/cowsay default
-/cowsay <any-stem-from--l>
-```
-
-If the token is **not** a loaded stem, `/cowsay <text>` is a one-shot render
-of that text with the current active cow.
-
-## Release
-
-**v1.0.5** — `SKILL.md` in Agent Skills format (frontmatter + install/usage instructions for skills.sh).
-
-| Piece | Status |
-|-------|--------|
-| Rounded dialog + original cow art | stable |
-| Layer split (`dialog` / `art` / `cows/`) | stable |
-| Terminal-aware wrap, hug-text box | stable |
-| Display width (wide/emoji/CJK/combining) | stable |
-| Active cow + skill UX (`/cowsay tux`, …) | stable |
-| Tests | `python3 tests/test_cowsay.py` |
-
-## License
-
-**[MIT](LICENSE)** — Copyright (c) 2026 kodexArg (Gabriel Cavedal) / [kodexarg.com](https://kodexarg.com).
-
-See [`LICENSE`](LICENSE) for the full text.
+🙏 Original cowsay by Tony Monroe — <https://github.com/cowsay-org/cowsay>
