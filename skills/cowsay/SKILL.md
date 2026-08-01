@@ -5,7 +5,9 @@ description: >
   bundled Python stdlib bin/cowsay with terminal-aware wrap and swappable
   ASCII art. Use when the user runs /cowsay, asks for cowsay mode, cowthink,
   modo vaca, change the cow, or switches art with /cowsay tux (or any stem
-  from cowsay -l). Apply persistent switches with --set-cow.
+  from cowsay -l). Apply persistent switches with --set-cow. Replies are
+  written in English unless the user explicitly asks for another language;
+  Spanish trigger phrases are recognized as input, not as a language request.
 license: MIT
 compatibility: >
   Requires Python 3. Uses only the Python standard library. Bundled
@@ -58,15 +60,15 @@ No network, no extra packages, no system `cowsay`.
 
 | User says | What happens |
 |-----------|----------------|
-| `/cowsay` | Enter cowsay mode until “basta vaca” / “normal mode” / “salí de cowsay” |
+| `/cowsay` | Enter cowsay mode until “normal mode” / “exit cowsay” / “enough cow” (ES: “basta vaca” / “salí de cowsay”) |
 | `/cowsay tux` | **Switch art** to Tux (persist with `--set-cow tux`) |
 | `/cowsay moose` | Switch art to moose |
 | `/cowsay default` | Switch art to default cow |
 | `/cowsay <stem>` | Switch art if `stem` is listed by `cowsay -l` |
 | `/cowsay <text>` | One-shot: render that text if `text` is **not** a loaded stem |
-| “change the cow” / “cambiar la vaca” (no name) | List every stem from `-l`, wait for pick, then `--set-cow` |
-| “cowthink” / “pensá” | Render with `--think` |
-| “solo esta vez” + a stem | One-shot art via `-f <stem>` (do not persist) |
+| “change the cow” (no name) (ES: “cambiar la vaca”) | List every stem from `-l`, wait for pick, then `--set-cow` |
+| “cowthink” / “think it” (ES: “pensá”) | Render with `--think` |
+| “just this once” + a stem (ES: “solo esta vez”) | One-shot art via `-f <stem>` (do not persist) |
 
 ### Example — TUX
 
@@ -153,7 +155,7 @@ fi
 "$SKILL_ROOT/bin/cowsay" -l
 "$SKILL_ROOT/bin/cowsay" --set-cow <stem>
 "$SKILL_ROOT/bin/cowsay" -W "$W" <<'COWEOF'
-Listo: vaca activa = <stem>
+Done: active cow = <stem>
 COWEOF
 ```
 
@@ -161,7 +163,9 @@ Do not invent stem names. Source of truth is `-l`.
 
 ### 3. Every final reply in cowsay mode
 
-1. Write the full answer in the user’s language.
+1. Write the full answer in **English**, regardless of the language the user
+   wrote in. Switch languages only on an explicit request (“answer in
+   Spanish”); a Spanish trigger phrase is not such a request.
 2. Pipe it through the binary (heredoc above).
 3. User-visible output = that stdout only.
 
