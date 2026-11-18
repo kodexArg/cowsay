@@ -2,57 +2,57 @@
 
 ![cowsay running inside Claude Code](assets/cowsay-demo.png)
 
-A cow that talks in your agent's terminal. Python 3 **stdlib only** — no
+A cow that talks in your agent's terminal. **One Python 3 stdlib file** — no
 network, no pip, no system `cowsay`. **MIT**, by [kodexArg](https://kodexarg.com).
 
 ```bash
 npx skills add kodexArg/cowsay
 ```
 
+```text
+╭─ ✔ ÉXITO ─────────────────────────────────╮
+│ Shipped the fix 🚀 https://example.com    │
+╰───────────────────────────────────────────╯
+        \   ^__^
+         \  (^^)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+```
+
 ## Talk to it
 
 | You say | It does |
 |---|---|
-| `/cowsay` | cow mode — every reply comes out of the cow |
-| `/cowsay tux` | swap the art (persists) |
 | `/cowsay hello world` | one-shot render |
-| "cowthink" | thought bubbles instead of speech |
-| "enough cow" | back to normal |
+| `/cowsay tux` | swap the animal for the session |
+| `/cowsay` | cow mode — every reply comes out of the cow |
+| "think it" | thought bubbles |
 
-## Or use the CLI
+## CLI
 
 ```bash
-cd skills/cowsay
-printf 'moo' | bin/cowsay             # ← the whole thing
-printf 'hmm' | bin/cowsay --think     # 💭
-bin/cowsay -l                         # default · moose · tux
-bin/cowsay --set-cow tux              # 🐧 forever
+bin/cowsay "moo"                        # args or stdin
+bin/cowsay --ok   "deployed"            # ╭─ ✔ ÉXITO ─╮  eyes ^^
+bin/cowsay --fail "build broke"         # ╭─ ✘ FALLO ─╮  eyes xx
+bin/cowsay --warn -t "heads up" "..."   # custom title
+bin/cowsay --think -f cat "hmm"         # 💭
+bin/cowsay -l                           # default tux moose cat koala
 ```
 
-Active cow wins in this order: `-f` → `COWSAY_COW` → `.active-cow` → `default`.
-Width takes care of itself (capped at 72 columns so it always fits) — just don't
-pass `-W`.
+- Rounded box, title in the border, mood-aware eyes.
+- Real display width: emoji, CJK and accents keep the box straight.
+- URLs and paths are never split.
+- Width follows the terminal, capped at 72. `COWSAY_WIDTH` pins it, `COWSAY_COW` picks the animal.
 
-## Why it exists
-
-Agents freehand ASCII art, and it comes out crooked. So the rule is
-**the renderer is law**: the agent pipes its answer through `bin/cowsay` and
-shows only stdout. Deterministic box, every time.
+**The renderer is law**: agents never freehand the box or the animal — they pipe
+through `bin/cowsay` and show only stdout.
 
 ```text
 skills/cowsay/
-  SKILL.md        agent instructions
-  bin/cowsay      compose
-  lib/dialog.py   the balloon
-  lib/art.py      the animal
-  cows/*.cow      more animals — drop yours in, or point COWPATH at them
-  tests/          goldens
-```
-
-Dialog and art are separate layers, so a new cow never touches the box.
-
-```bash
-python3 skills/cowsay/tests/test_cowsay.py
+  SKILL.md          agent instructions
+  bin/cowsay        the whole thing (~120 lines)
+  tests/            python3 skills/cowsay/tests/test_cowsay.py
 ```
 
 🙏 Original cowsay by Tony Monroe — <https://github.com/cowsay-org/cowsay>
